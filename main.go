@@ -15,12 +15,18 @@ type Subject struct {
 	Url   string `json:"url"`
 }
 
+type Repository struct {
+	Name     string `json:"name"`
+	FullName string `json:"full_name"`
+}
+
 type Notification struct {
-	Unread    bool      `json:"unread"`
-	Reason    string    `json:"reason"`
-	UpdatedAt time.Time `json:"updated_at"`
-	Subject   Subject   `json:"subject"`
-	Url       string    `json:"url"`
+	Unread     bool       `json:"unread"`
+	Reason     string     `json:"reason"`
+	UpdatedAt  time.Time  `json:"updated_at"`
+	Subject    Subject    `json:"subject"`
+	Url        string     `json:"url"`
+	Repository Repository `json:"repository"`
 }
 
 func main() {
@@ -76,6 +82,7 @@ func notifiyIfNeeded(filename string) error {
 			if n.UpdatedAt.After(latest) {
 				title := fmt.Sprintf("%s %s", n.Reason, n.Subject.Title)
 				note := gosxnotifier.NewNotification(title)
+				note.Subtitle = n.Repository.Name
 				note.Link = n.Url
 				note.Sound = gosxnotifier.Default
 				note.Push()
