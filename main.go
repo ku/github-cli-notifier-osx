@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -80,14 +81,16 @@ func notifiyIfNeeded(filename string) error {
 	} else {
 		for _, n := range notifications {
 			if n.UpdatedAt.After(latest) {
-				title := fmt.Sprintf("%s %s", n.Reason, n.Subject.Title)
-				note := gosxnotifier.NewNotification(title)
-				note.Subtitle = n.Repository.Name
-				note.Link = n.Url
-				note.Sound = gosxnotifier.Default
-				note.Push()
-				latest = n.UpdatedAt
-				println(title)
+				if strings.HasPrefix(n.Repository.FullName, os.Getenv("GITHUB_NOTIFIER_FILTER")) {
+					title := fmt.Sprintf("%s %s", n.Reason, n.Subject.Title)
+					note := gosxnotifier.NewNotification(title)
+					note.Subtitle = n.Repository.Name
+					note.Link = n.Subject.Url
+					note.Sound = gosxnotifier.Default
+					note.Push()
+					latest = n.UpdatedAt
+					println(title)
+				}
 			}
 
 			touch(filename)
